@@ -1,110 +1,41 @@
 import { create } from "zustand";
-import {
-  type UserRole, type Ambulance, type NewsItem, type Emergency,
-  INITIAL_AMBULANCES, INITIAL_NEWS, INITIAL_EMERGENCIES,
-  AMB_START, PATIENT_COORD, haversine,
-} from "@/lib/constants";
-
-interface User {
-  role: UserRole;
-  name: string;
-  phone: string;
-  avatar: string;
-}
+import { type UserRole, type Incident, VERIFICATION_KEY } from "@/lib/constants";
 
 interface AppState {
-  user: User | null;
-  ambulances: Ambulance[];
-  news: NewsItem[];
-  emergencies: Emergency[];
-  myEmergency: Emergency | null;
-  ambStatus: "assigned" | "accepted" | "resolved";
-  ambCurrentPos: [number, number];
-  sosState: "idle" | "holding" | "loading" | "activated";
+  role: UserRole;
+  incidents: Incident[];
+  sosLoading: boolean;
+  lastLocation: [number, number] | null;
 
-  // Actions
-  login: (user: User) => void;
-  logout: () => void;
-  fireSOS: (userName: string) => Emergency | null;
-  setSosState: (s: AppState["sosState"]) => void;
-  acceptRequest: () => void;
-  markReached: () => void;
-  setAmbPos: (pos: [number, number]) => void;
-  verifyNews: (id: number, role: string) => void;
-  flagNews: (id: number) => void;
-  unflagNews: (id: number) => void;
-  postNews: (title: string, role: string) => void;
+  setRole: (role: UserRole) => void;
+  addIncident: (incident: Incident) => void;
+  verifyIncident: (id: string, key: string, role: UserRole) => boolean;
+  setSosLoading: (v: boolean) => void;
+  setLastLocation: (pos: [number, number]) => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
-  user: null,
-  ambulances: [...INITIAL_AMBULANCES],
-  news: [...INITIAL_NEWS],
-  emergencies: [...INITIAL_EMERGENCIES],
-  myEmergency: null,
-  ambStatus: "assigned",
-  ambCurrentPos: [...AMB_START],
-  sosState: "idle",
+  role: "user",
+  incidents: [],
+  sosLoading: false,
+  lastLocation: null,
 
-  login: (user) => set({ user }),
-  logout: () => set({
-    user: null,
-    myEmergency: null,
-    ambStatus: "assigned",
-    ambCurrentPos: [...AMB_START],
-    sosState: "idle",
-  }),
+  setRole: (role) => set({ role }),
 
-  fireSOS: (userName) => {
-    const { ambulances } = get();
-    const avail = ambulances.filter((a) => a.available);
-    if (!avail.length) return null;
-    const best = avail.reduce((a, b) =>
-      haversine(PATIENT_COORD, [a.lat, a.lng]) < haversine(PATIENT_COORD, [b.lat, b.lng]) ? a : b
-    );
-    const dist = haversine(PATIENT_COORD, [best.lat, best.lng]).toFixed(1);
-    const eta = Math.ceil(parseFloat(dist) / 0.5);
-    const emg: Emergency = {
-      id: Date.now(), userName, lat: PATIENT_COORD[0], lng: PATIENT_COORD[1],
-      location: "Mumbai-Pune Expressway, NH-48, Khopoli Exit",
-      status: "assigned", ambulanceId: best.id, ambulanceName: best.name,
-      severity: "critical", distance: dist, eta, time: "Just now",
-    };
+  addIncident: (incident) => set((s) => ({
+    incidents: [incident, ...s.incidents],
+  })),
+
+  verifyIncident: (id, key, role) => {
+    if (key !== VERIFICATION_KEY) return false;
     set((s) => ({
-      ambulances: s.ambulances.map((a) => a.id === best.id ? { ...a, available: false } : a),
-      emergencies: [emg, ...s.emergencies],
-      myEmergency: emg,
-      sosState: "activated",
+      incidents: s.incidents.map((inc) =>
+        inc.id === id ? { ...inc, status: "verified" as const, verifiedBy: role } : inc
+      ),
     }));
-    return emg;
+    return true;
   },
 
-  setSosState: (sosState) => set({ sosState }),
-
-  acceptRequest: () => set((s) => ({
-    ambStatus: "accepted",
-    ambulances: s.ambulances.map((a, i) => i === 0 ? { ...a, available: false } : a),
-    emergencies: s.emergencies.map((e, i) => i === 0 ? { ...e, status: "accepted" } : e),
-  })),
-
-  markReached: () => set((s) => ({
-    ambStatus: "resolved",
-    ambulances: s.ambulances.map((a, i) => i === 0 ? { ...a, available: true } : a),
-    emergencies: s.emergencies.map((e, i) => i === 0 ? { ...e, status: "resolved" } : e),
-  })),
-
-  setAmbPos: (pos) => set({ ambCurrentPos: pos }),
-
-  verifyNews: (id, role) => set((s) => ({
-    news: s.news.map((n) => n.id === id ? { ...n, ver: role, flag: false } : n),
-  })),
-  flagNews: (id) => set((s) => ({
-    news: s.news.map((n) => n.id === id ? { ...n, flag: true, ver: null } : n),
-  })),
-  unflagNews: (id) => set((s) => ({
-    news: s.news.map((n) => n.id === id ? { ...n, flag: false } : n),
-  })),
-  postNews: (title, role) => set((s) => ({
-    news: [{ id: Date.now(), title, src: `Official: ${role}`, sum: title, time: "Just now", cat: "official", ver: role, flag: false, votes: 0 }, ...s.news],
-  })),
+  setSosLoading: (sosLoading) => set({ sosLoading }),
+  setLastLocation: (lastLocation) => set({ lastLocation }),
 }));

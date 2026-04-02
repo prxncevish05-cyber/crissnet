@@ -1,0 +1,117 @@
+import { useState } from "react";
+import { useAppStore } from "@/stores/appStore";
+import { useToastNotify } from "@/hooks/useToastNotify";
+import IncidentMap from "@/components/IncidentMap";
+import { Building2, CheckCircle, XCircle, Lock, Heart, Activity } from "lucide-react";
+
+const HospitalDashboard = () => {
+  const notify = useToastNotify();
+  const { incidents, verifyIncident, role } = useAppStore();
+  const [verifyingId, setVerifyingId] = useState<string | null>(null);
+  const [keyInput, setKeyInput] = useState("");
+  const [error, setError] = useState(false);
+
+  const handleVerify = (id: string) => {
+    setError(false);
+    const success = verifyIncident(id, keyInput, role);
+    if (success) {
+      notify("✅ Incident Verified!", "Case updated in system", "ok");
+      setVerifyingId(null);
+      setKeyInput("");
+    } else {
+      setError(true);
+      notify("❌ Invalid Key", "Verification key is incorrect", "err");
+    }
+  };
+
+  const emergencyCases = incidents.filter((i) => i.type === "sos" || i.type === "medical");
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-6 space-y-6 cn-animate-up">
+      <div className="flex items-center gap-3 mb-2">
+        <div className="w-10 h-10 rounded-xl bg-cn-green-light flex items-center justify-center">
+          <Building2 size={22} className="text-cn-green" />
+        </div>
+        <div>
+          <h2 className="text-xl font-extrabold">Hospital Dashboard</h2>
+          <p className="text-xs text-muted-foreground">Emergency cases & incident verification</p>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { icon: <Heart size={18} />, label: "Emergency Cases", value: emergencyCases.length, color: "text-primary" },
+          { icon: <Activity size={18} />, label: "Active", value: incidents.filter((i) => i.status === "unverified").length, color: "text-cn-amber" },
+          { icon: <CheckCircle size={18} />, label: "Verified", value: incidents.filter((i) => i.status === "verified").length, color: "text-cn-green" },
+          { icon: <Building2 size={18} />, label: "Total", value: incidents.length, color: "text-cn-blue" },
+        ].map((s) => (
+          <div key={s.label} className="p-4 rounded-xl bg-card border border-border">
+            <div className={`mb-1 ${s.color}`}>{s.icon}</div>
+            <div className="text-xl font-extrabold">{s.value}</div>
+            <div className="text-[10px] text-muted-foreground">{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <IncidentMap height={400} />
+        </div>
+
+        {/* Emergency Cases */}
+        <div className="rounded-2xl bg-card border border-border overflow-hidden">
+          <div className="px-4 py-3 border-b border-border">
+            <h3 className="text-sm font-bold flex items-center gap-2">
+              <Heart size={16} className="text-primary" />
+              Emergency Cases
+            </h3>
+          </div>
+          <div className="max-h-[360px] overflow-y-auto cn-hide-scrollbar">
+            {incidents.length === 0 ? (
+              <div className="p-8 text-center text-muted-foreground text-sm">No emergency cases</div>
+            ) : (
+              incidents.map((inc) => (
+                <div key={inc.id} className="p-4 border-b border-border">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    {inc.status === "verified" ? (
+                      <span className="flex items-center gap-1 text-[10px] font-bold text-cn-green bg-cn-green-light px-2 py-0.5 rounded-full"><CheckCircle size={10} /> VERIFIED</span>
+                    ) : (
+                      <span className="flex items-center gap-1 text-[10px] font-bold text-primary bg-cn-red-light px-2 py-0.5 rounded-full"><XCircle size={10} /> UNVERIFIED</span>
+                    )}
+                    <span className="text-[10px] text-muted-foreground uppercase font-semibold">{inc.type}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">📍 {inc.lat.toFixed(4)}, {inc.lng.toFixed(4)}</p>
+                  <p className="text-[10px] text-muted-foreground">🕐 {new Date(inc.timestamp).toLocaleString()}</p>
+
+                  {inc.status === "unverified" && (
+                    verifyingId === inc.id ? (
+                      <div className="mt-2 space-y-2 cn-animate-up">
+                        <div className="flex gap-2">
+                          <div className="flex-1 relative">
+                            <Lock size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                            <input type="password" value={keyInput} onChange={(e) => { setKeyInput(e.target.value); setError(false); }}
+                              placeholder="Enter key..." className={`w-full pl-8 pr-3 py-2 text-xs rounded-lg bg-secondary border ${error ? "border-primary" : "border-border"} outline-none focus:border-primary/50`} />
+                          </div>
+                          <button onClick={() => handleVerify(inc.id)} className="px-3 py-2 bg-cn-green text-primary-foreground text-xs font-bold rounded-lg">✓</button>
+                          <button onClick={() => { setVerifyingId(null); setKeyInput(""); setError(false); }} className="px-3 py-2 bg-secondary text-muted-foreground text-xs rounded-lg">✕</button>
+                        </div>
+                        {error && <p className="text-[10px] text-primary font-semibold">Invalid verification key</p>}
+                      </div>
+                    ) : (
+                      <button onClick={() => setVerifyingId(inc.id)} className="mt-2 w-full py-2 text-xs font-bold rounded-lg bg-cn-green-light text-cn-green hover:bg-cn-green hover:text-primary-foreground transition-all">
+                        Verify Incident
+                      </button>
+                    )
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default HospitalDashboard;
