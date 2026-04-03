@@ -115,4 +115,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   postNews: (title, role) => set((s) => ({
     news: [{ id: Date.now(), title, src: `Official: ${role}`, sum: title, time: "Just now", cat: "official", ver: role, flag: false, votes: 0 }, ...s.news],
   })),
+  setSosVideoUrl: (url) => set({ sosVideoUrl: url }),
+  setIncidentVerdict: (v) => set({ incidentVerdict: v }),
 }));
