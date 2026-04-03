@@ -12,6 +12,9 @@ const AmbulanceDashboard = () => {
   const ambStatus = useAppStore((s) => s.ambStatus);
   const acceptRequest = useAppStore((s) => s.acceptRequest);
   const markReached = useAppStore((s) => s.markReached);
+  const sosVideoUrl = useAppStore((s) => s.sosVideoUrl);
+  const incidentVerdict = useAppStore((s) => s.incidentVerdict);
+  const setIncidentVerdict = useAppStore((s) => s.setIncidentVerdict);
   const [menuOpen, setMenuOpen] = useState(false);
   const [tab, setTab] = useState<"req" | "nav" | "stats">("req");
 
