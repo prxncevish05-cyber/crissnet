@@ -46,6 +46,7 @@ const PublicDashboard = () => {
                 </div>
               </div>
               <SOSButton />
+              {sosState === "activated" && <SOSVideoRecorder />}
               {myEmg && (
                 <div className="mx-4 mt-2.5 p-3.5 rounded-[13px] border-[1.5px]" style={{ background: "#F0FDF4", borderColor: "#86EFAC" }}>
                   <div className="font-bold text-cn-green text-[15px] flex items-center gap-2">🚑 Ambulance Dispatched!</div>
