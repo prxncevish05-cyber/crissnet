@@ -21,6 +21,8 @@ interface AppState {
   ambStatus: "assigned" | "accepted" | "resolved";
   ambCurrentPos: [number, number];
   sosState: "idle" | "holding" | "loading" | "activated";
+  sosVideoUrl: string | null;
+  incidentVerdict: "pending" | "real" | "fake";
 
   // Actions
   login: (user: User) => void;
