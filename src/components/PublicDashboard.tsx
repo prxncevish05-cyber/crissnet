@@ -16,7 +16,7 @@ const PublicDashboard = () => {
   const news = useAppStore((s) => s.news);
   const [menuOpen, setMenuOpen] = useState(false);
   const [tab, setTab] = useState<"alert" | "track" | "news">("alert");
-  const [newsFilter, setNewsFilter] = useState("all");
+  const [newsFilter, setNewsFilter] = useState("live");
 
   const tabs = [
     { id: "alert" as const, icon: "🚨", label: "Alert" },
