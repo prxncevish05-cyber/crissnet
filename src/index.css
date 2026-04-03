@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+
 
 @layer base {
   :root {
@@ -117,10 +117,6 @@
   50% { transform: translateY(-5px); }
 }
 
-/* ── Leaflet overrides ── */
-.leaflet-control-zoom { border: none !important; box-shadow: 0 4px 16px rgba(0,0,0,.12) !important; }
-.leaflet-control-zoom a { border-radius: 8px !important; border: 1px solid hsl(var(--cn-gray-2)) !important; color: hsl(var(--cn-gray-7)) !important; font-weight: 700 !important; }
-.leaflet-control-attribution { font-size: 9px !important; background: rgba(255,255,255,.7) !important; }
 
 /* Utility */
 .cn-animate-up { animation: cn-up 0.4s ease; }
