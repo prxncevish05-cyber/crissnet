@@ -1,24 +1,16 @@
 import { useAppStore } from "@/stores/appStore";
-import TopNav from "@/components/TopNav";
-import UserDashboard from "@/components/UserDashboard";
-import PoliceDashboard from "@/components/PoliceDashboard";
-import HospitalDashboard from "@/components/HospitalDashboard";
-import NHAIDashboard from "@/components/NHAIDashboard";
+import LoginPage from "@/components/LoginPage";
+import PublicDashboard from "@/components/PublicDashboard";
+import AmbulanceDashboard from "@/components/AmbulanceDashboard";
+import AuthorityDashboard from "@/components/AuthorityDashboard";
 
 const Index = () => {
-  const role = useAppStore((s) => s.role);
+  const user = useAppStore((s) => s.user);
 
-  return (
-    <div className="min-h-screen bg-background">
-      <TopNav />
-      <main className="pt-16">
-        {role === "user" && <UserDashboard />}
-        {role === "police" && <PoliceDashboard />}
-        {role === "hospital" && <HospitalDashboard />}
-        {role === "nhai" && <NHAIDashboard />}
-      </main>
-    </div>
-  );
+  if (!user) return <LoginPage />;
+  if (user.role === "public") return <PublicDashboard />;
+  if (user.role === "ambulance") return <AmbulanceDashboard />;
+  return <AuthorityDashboard />;
 };
 
 export default Index;

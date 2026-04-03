@@ -6,58 +6,58 @@
 
 @layer base {
   :root {
-    --background: 222 47% 6%;
-    --foreground: 210 40% 96%;
-    --card: 222 47% 9%;
-    --card-foreground: 210 40% 96%;
-    --popover: 222 47% 9%;
-    --popover-foreground: 210 40% 96%;
+    --background: 210 20% 98%;
+    --foreground: 220 20% 6%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 6%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 6%;
     --primary: 0 72% 51%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 217 33% 14%;
-    --secondary-foreground: 210 40% 90%;
-    --muted: 217 33% 14%;
-    --muted-foreground: 215 20% 55%;
-    --accent: 217 33% 17%;
-    --accent-foreground: 210 40% 96%;
+    --secondary: 217 19% 96%;
+    --secondary-foreground: 220 13% 26%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 56%;
+    --accent: 217 19% 96%;
+    --accent-foreground: 220 13% 26%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
+    --border: 216 20% 91%;
+    --input: 216 20% 91%;
     --ring: 0 72% 51%;
     --radius: 0.75rem;
 
     /* CrissNet custom tokens */
     --cn-red: 0 72% 51%;
-    --cn-red-light: 0 40% 15%;
+    --cn-red-light: 0 100% 95%;
     --cn-red-dark: 0 74% 35%;
     --cn-blue: 221 83% 53%;
-    --cn-blue-light: 221 50% 15%;
+    --cn-blue-light: 214 95% 93%;
     --cn-green: 160 84% 39%;
-    --cn-green-light: 160 40% 12%;
+    --cn-green-light: 138 76% 94%;
     --cn-amber: 38 92% 50%;
-    --cn-amber-light: 38 40% 14%;
+    --cn-amber-light: 48 96% 89%;
     --cn-indigo: 239 84% 67%;
-    --cn-indigo-light: 239 40% 15%;
-    --cn-gray-0: 222 47% 8%;
-    --cn-gray-1: 222 40% 11%;
-    --cn-gray-2: 217 33% 17%;
-    --cn-gray-4: 215 20% 40%;
-    --cn-gray-5: 215 16% 50%;
-    --cn-gray-7: 210 30% 75%;
-    --cn-gray-9: 210 40% 96%;
+    --cn-indigo-light: 226 100% 94%;
+    --cn-gray-0: 210 20% 98%;
+    --cn-gray-1: 220 14% 96%;
+    --cn-gray-2: 216 12% 91%;
+    --cn-gray-4: 218 11% 65%;
+    --cn-gray-5: 220 9% 46%;
+    --cn-gray-7: 218 17% 27%;
+    --cn-gray-9: 220 20% 6%;
 
-    --cn-shadow: 0 2px 8px rgba(0,0,0,.3);
-    --cn-shadow-lg: 0 8px 30px rgba(0,0,0,.5);
+    --cn-shadow: 0 2px 8px rgba(0,0,0,.07);
+    --cn-shadow-lg: 0 8px 30px rgba(0,0,0,.15);
 
-    --sidebar-background: 222 47% 9%;
-    --sidebar-foreground: 210 40% 80%;
-    --sidebar-primary: 0 72% 51%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 33% 14%;
-    --sidebar-accent-foreground: 210 40% 96%;
-    --sidebar-border: 217 33% 17%;
-    --sidebar-ring: 0 72% 51%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
 
@@ -67,7 +67,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 }
 
@@ -101,12 +101,8 @@
   100% { transform: translateX(-100%); }
 }
 @keyframes cn-sos-glow {
-  0%,100% { box-shadow: 0 0 40px rgba(220,38,38,.5), 0 0 80px rgba(220,38,38,.2), inset 0 2px 8px rgba(255,255,255,.1); }
-  50% { box-shadow: 0 0 60px rgba(220,38,38,.8), 0 0 120px rgba(220,38,38,.3), inset 0 2px 8px rgba(255,255,255,.2); }
-}
-@keyframes cn-sos-ring {
-  0% { transform: scale(1); opacity: 0.6; }
-  100% { transform: scale(2.5); opacity: 0; }
+  0%,100% { box-shadow: 0 8px 40px rgba(220,38,38,.5), inset 0 2px 8px rgba(255,255,255,.15); }
+  50% { box-shadow: 0 8px 60px rgba(220,38,38,.8), inset 0 2px 8px rgba(255,255,255,.25); }
 }
 @keyframes cn-amb-pulse {
   0% { transform: translate(-50%,-50%) scale(1); opacity:.5; }
@@ -121,13 +117,10 @@
   50% { transform: translateY(-5px); }
 }
 
-/* ── Leaflet overrides (dark) ── */
-.leaflet-control-zoom { border: none !important; box-shadow: 0 4px 16px rgba(0,0,0,.4) !important; }
-.leaflet-control-zoom a { border-radius: 8px !important; background: hsl(222 47% 9% / 0.95) !important; border: 1px solid hsl(217 33% 17%) !important; color: hsl(210 40% 80%) !important; font-weight: 700 !important; }
-.leaflet-control-zoom a:hover { background: hsl(217 33% 14%) !important; }
-.leaflet-control-attribution { font-size: 9px !important; background: rgba(0,0,0,.7) !important; color: hsl(215 20% 55%) !important; }
-.leaflet-popup-content-wrapper { background: hsl(222 47% 9%) !important; color: hsl(210 40% 96%) !important; border: 1px solid hsl(217 33% 17%) !important; border-radius: 12px !important; box-shadow: 0 8px 30px rgba(0,0,0,.5) !important; }
-.leaflet-popup-tip { background: hsl(222 47% 9%) !important; }
+/* ── Leaflet overrides ── */
+.leaflet-control-zoom { border: none !important; box-shadow: 0 4px 16px rgba(0,0,0,.12) !important; }
+.leaflet-control-zoom a { border-radius: 8px !important; border: 1px solid hsl(var(--cn-gray-2)) !important; color: hsl(var(--cn-gray-7)) !important; font-weight: 700 !important; }
+.leaflet-control-attribution { font-size: 9px !important; background: rgba(255,255,255,.7) !important; }
 
 /* Utility */
 .cn-animate-up { animation: cn-up 0.4s ease; }
@@ -138,14 +131,7 @@
 .cn-animate-ticker { animation: cn-ticker 24s linear infinite; }
 .cn-animate-sos-glow { animation: cn-sos-glow 2s ease infinite; }
 .cn-animate-pulse-ring { animation: cn-pulse-ring 2.5s ease infinite; }
-.cn-animate-sos-ring { animation: cn-sos-ring 2s ease-out infinite; }
 
 /* Scrollbar hide */
 .cn-hide-scrollbar::-webkit-scrollbar { display: none; }
 .cn-hide-scrollbar { scrollbar-width: none; }
-
-/* Custom scrollbar for dark theme */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: hsl(222 47% 6%); }
-::-webkit-scrollbar-thumb { background: hsl(217 33% 22%); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: hsl(217 33% 30%); }
