@@ -7,6 +7,7 @@ import NewsTicker from "@/components/NewsTicker";
 import SOSButton from "@/components/SOSButton";
 import LiveMap from "@/components/LiveMap";
 import NewsCard from "@/components/NewsCard";
+import LiveNewsFeed from "@/components/LiveNewsFeed";
 
 const PublicDashboard = () => {
   const notify = useToastNotify();
