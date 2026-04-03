@@ -36,6 +36,8 @@ interface AppState {
   flagNews: (id: number) => void;
   unflagNews: (id: number) => void;
   postNews: (title: string, role: string) => void;
+  setSosVideoUrl: (url: string | null) => void;
+  setIncidentVerdict: (v: "pending" | "real" | "fake") => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
