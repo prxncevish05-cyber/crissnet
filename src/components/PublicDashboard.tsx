@@ -101,20 +101,24 @@ const PublicDashboard = () => {
           )}
           {tab === "news" && (
             <div>
-              <div className="px-4 py-3"><div className="text-xl font-extrabold">📰 Verified News</div></div>
+              <div className="px-4 py-3"><div className="text-xl font-extrabold">📰 News</div></div>
               <div className="flex gap-2 overflow-x-auto px-4 pb-1 cn-hide-scrollbar">
-                {["all", "accident", "weather", "road", "health"].map((f) => (
+                {["live", "all", "accident", "weather", "road", "health"].map((f) => (
                   <button key={f} onClick={() => setNewsFilter(f)}
                     className={`px-3.5 py-1.5 rounded-full border-[1.5px] text-xs font-bold whitespace-nowrap transition-all ${newsFilter === f ? "bg-cn-red border-cn-red text-primary-foreground" : "bg-card border-border text-cn-gray-5"}`}>
-                    {f === "all" ? "All" : f.charAt(0).toUpperCase() + f.slice(1)}
+                    {f === "live" ? "📡 Live" : f === "all" ? "All" : f.charAt(0).toUpperCase() + f.slice(1)}
                   </button>
                 ))}
               </div>
-              <div className="px-4 flex flex-col gap-2.5 mt-2.5">
-                {filteredNews.length ? filteredNews.map((n) => <NewsCard key={n.id} news={n} />) : (
-                  <div className="text-center py-12 text-muted-foreground"><div className="text-[44px]">📭</div><div className="font-semibold mt-2.5">No verified updates</div></div>
-                )}
-              </div>
+              {newsFilter === "live" ? (
+                <LiveNewsFeed />
+              ) : (
+                <div className="px-4 flex flex-col gap-2.5 mt-2.5">
+                  {filteredNews.length ? filteredNews.map((n) => <NewsCard key={n.id} news={n} />) : (
+                    <div className="text-center py-12 text-muted-foreground"><div className="text-[44px]">📭</div><div className="font-semibold mt-2.5">No verified updates</div></div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
