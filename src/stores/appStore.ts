@@ -49,6 +49,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   ambStatus: "assigned",
   ambCurrentPos: [...AMB_START],
   sosState: "idle",
+  sosVideoUrl: null,
+  incidentVerdict: "pending",
 
   login: (user) => set({ user }),
   logout: () => set({
