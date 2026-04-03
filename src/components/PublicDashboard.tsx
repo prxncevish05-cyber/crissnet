@@ -5,6 +5,7 @@ import TopBar from "@/components/TopBar";
 import MenuPanel from "@/components/MenuPanel";
 import NewsTicker from "@/components/NewsTicker";
 import SOSButton from "@/components/SOSButton";
+import SOSVideoRecorder from "@/components/SOSVideoRecorder";
 import LiveMap from "@/components/LiveMap";
 import NewsCard from "@/components/NewsCard";
 import LiveNewsFeed from "@/components/LiveNewsFeed";
