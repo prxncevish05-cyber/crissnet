@@ -12,6 +12,9 @@ const AmbulanceDashboard = () => {
   const ambStatus = useAppStore((s) => s.ambStatus);
   const acceptRequest = useAppStore((s) => s.acceptRequest);
   const markReached = useAppStore((s) => s.markReached);
+  const sosVideoUrl = useAppStore((s) => s.sosVideoUrl);
+  const incidentVerdict = useAppStore((s) => s.incidentVerdict);
+  const setIncidentVerdict = useAppStore((s) => s.setIncidentVerdict);
   const [menuOpen, setMenuOpen] = useState(false);
   const [tab, setTab] = useState<"req" | "nav" | "stats">("req");
 
@@ -86,6 +89,42 @@ const AmbulanceDashboard = () => {
                   )}
                   {ambStatus === "resolved" && <span className="text-cn-green font-bold text-sm">✅ Completed</span>}
                 </div>
+                {/* Video Evidence Section */}
+                {sosVideoUrl && (
+                  <div className="mt-3 rounded-[12px] border border-border overflow-hidden bg-card">
+                    <div className="px-3 py-2 flex items-center gap-2" style={{ background: "#FFF7ED", borderBottom: "1px solid #FED7AA" }}>
+                      <span className="text-lg">📹</span>
+                      <span className="font-bold text-sm text-cn-amber">Incident Video Evidence</span>
+                      {incidentVerdict !== "pending" && (
+                        <span className={`ml-auto px-2 py-0.5 rounded-full text-[11px] font-bold uppercase ${incidentVerdict === "real" ? "bg-cn-green-light text-cn-green" : "bg-cn-red-light text-cn-red"}`}>
+                          {incidentVerdict === "real" ? "✅ Verified Real" : "❌ Marked Fake"}
+                        </span>
+                      )}
+                    </div>
+                    <video
+                      src={sosVideoUrl}
+                      controls
+                      playsInline
+                      className="w-full h-[200px] object-cover bg-black"
+                    />
+                    {incidentVerdict === "pending" && (
+                      <div className="p-3 flex gap-2">
+                        <button
+                          onClick={() => { setIncidentVerdict("real"); notify("Incident Verified", "Marked as REAL — proceeding with dispatch", "ok"); }}
+                          className="flex-1 py-2.5 rounded-[9px] bg-cn-green-light text-cn-green font-bold text-sm flex items-center justify-center gap-1.5"
+                        >
+                          ✅ Real Incident
+                        </button>
+                        <button
+                          onClick={() => { setIncidentVerdict("fake"); notify("Incident Flagged", "Marked as FAKE — authorities notified", "err"); }}
+                          className="flex-1 py-2.5 rounded-[9px] bg-cn-red-light text-cn-red font-bold text-sm flex items-center justify-center gap-1.5"
+                        >
+                          ❌ Fake / Prank
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground"><div className="text-[50px]">🚑</div><div className="font-semibold mt-3">No active assignment</div></div>

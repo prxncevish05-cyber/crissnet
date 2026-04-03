@@ -5,6 +5,7 @@ import TopBar from "@/components/TopBar";
 import MenuPanel from "@/components/MenuPanel";
 import NewsTicker from "@/components/NewsTicker";
 import SOSButton from "@/components/SOSButton";
+import SOSVideoRecorder from "@/components/SOSVideoRecorder";
 import LiveMap from "@/components/LiveMap";
 import NewsCard from "@/components/NewsCard";
 import LiveNewsFeed from "@/components/LiveNewsFeed";
@@ -13,6 +14,7 @@ const PublicDashboard = () => {
   const notify = useToastNotify();
   const user = useAppStore((s) => s.user);
   const myEmg = useAppStore((s) => s.myEmergency);
+  const sosState = useAppStore((s) => s.sosState);
   const news = useAppStore((s) => s.news);
   const [menuOpen, setMenuOpen] = useState(false);
   const [tab, setTab] = useState<"alert" | "track" | "news">("alert");
@@ -44,6 +46,7 @@ const PublicDashboard = () => {
                 </div>
               </div>
               <SOSButton />
+              {sosState === "activated" && <SOSVideoRecorder />}
               {myEmg && (
                 <div className="mx-4 mt-2.5 p-3.5 rounded-[13px] border-[1.5px]" style={{ background: "#F0FDF4", borderColor: "#86EFAC" }}>
                   <div className="font-bold text-cn-green text-[15px] flex items-center gap-2">🚑 Ambulance Dispatched!</div>

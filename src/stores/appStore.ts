@@ -21,6 +21,8 @@ interface AppState {
   ambStatus: "assigned" | "accepted" | "resolved";
   ambCurrentPos: [number, number];
   sosState: "idle" | "holding" | "loading" | "activated";
+  sosVideoUrl: string | null;
+  incidentVerdict: "pending" | "real" | "fake";
 
   // Actions
   login: (user: User) => void;
@@ -34,6 +36,8 @@ interface AppState {
   flagNews: (id: number) => void;
   unflagNews: (id: number) => void;
   postNews: (title: string, role: string) => void;
+  setSosVideoUrl: (url: string | null) => void;
+  setIncidentVerdict: (v: "pending" | "real" | "fake") => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -45,6 +49,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   ambStatus: "assigned",
   ambCurrentPos: [...AMB_START],
   sosState: "idle",
+  sosVideoUrl: null,
+  incidentVerdict: "pending",
 
   login: (user) => set({ user }),
   logout: () => set({
@@ -53,6 +59,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     ambStatus: "assigned",
     ambCurrentPos: [...AMB_START],
     sosState: "idle",
+    sosVideoUrl: null,
+    incidentVerdict: "pending",
   }),
 
   fireSOS: (userName) => {
@@ -107,4 +115,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   postNews: (title, role) => set((s) => ({
     news: [{ id: Date.now(), title, src: `Official: ${role}`, sum: title, time: "Just now", cat: "official", ver: role, flag: false, votes: 0 }, ...s.news],
   })),
+  setSosVideoUrl: (url) => set({ sosVideoUrl: url }),
+  setIncidentVerdict: (v) => set({ incidentVerdict: v }),
 }));
