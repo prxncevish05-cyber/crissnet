@@ -14,6 +14,7 @@ const PublicDashboard = () => {
   const notify = useToastNotify();
   const user = useAppStore((s) => s.user);
   const myEmg = useAppStore((s) => s.myEmergency);
+  const sosState = useAppStore((s) => s.sosState);
   const news = useAppStore((s) => s.news);
   const [menuOpen, setMenuOpen] = useState(false);
   const [tab, setTab] = useState<"alert" | "track" | "news">("alert");
