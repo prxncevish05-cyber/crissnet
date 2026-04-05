@@ -87,15 +87,10 @@ const AuthorityDashboard = () => {
                 </div>
               )) : <div className="text-center py-4 text-muted-foreground text-sm">No active emergencies 🎉</div>}
             </div>
-            {/* Accuracy */}
+            {/* Highway Accident Live Feed */}
             <div className="bg-card rounded-[13px] border border-border p-3.5">
-              <div className="text-[17px] font-bold mb-3">📈 Info Accuracy</div>
-              {[{ l: "Verified", v: myVerified, c: "#059669" }, { l: "Pending", v: pending, c: "#D97706" }, { l: "Flagged", v: flagged, c: "#DC2626" }].map((x) => (
-                <div key={x.l} className="mb-3">
-                  <div className="flex justify-between text-sm font-semibold mb-1"><span>{x.l}</span><span className="text-muted-foreground">{x.v}/{news.length}</span></div>
-                  <div className="bg-cn-gray-1 rounded-[5px] h-2"><div className="h-full rounded-[5px] transition-all duration-500" style={{ width: `${Math.round((x.v / news.length) * 100)}%`, background: x.c }} /></div>
-                </div>
-              ))}
+              <div className="text-[17px] font-bold mb-3">🛣️ Live Highway Accident Reports</div>
+              <HighwayNewsFeed />
             </div>
           </>
         )}
