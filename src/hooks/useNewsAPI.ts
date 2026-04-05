@@ -40,7 +40,7 @@ function mapCategory(cats: string[]): string {
   return "official";
 }
 
-export function useNewsAPI(query = "India disaster OR accident OR emergency OR weather") {
+export function useNewsAPI(query = "India disaster OR accident OR emergency OR weather", refreshInterval = 0) {
   const [articles, setArticles] = useState<LiveNewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
