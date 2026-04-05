@@ -122,6 +122,14 @@ const LiveMap = ({ height = 280, autoTrack = false, statusLabel = "🚑 En Route
           label={{ text: "🚑", fontSize: "20px" }}
           title="Ambulance Unit-1"
         />
+        {/* User's current location */}
+        {userLocation && (
+          <Marker
+            position={userLocation}
+            label={{ text: "📍", fontSize: "20px" }}
+            title="Your Location"
+          />
+        )}
         {/* Route line */}
         <Polyline
           path={routePath}
