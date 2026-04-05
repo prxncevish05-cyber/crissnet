@@ -75,8 +75,12 @@ export function useNewsAPI(query = "India disaster OR accident OR emergency OR w
       }
     };
     fetchNews();
-    return () => { cancelled = true; };
-  }, [query]);
+    let interval: ReturnType<typeof setInterval> | null = null;
+    if (refreshInterval > 0) {
+      interval = setInterval(fetchNews, refreshInterval);
+    }
+    return () => { cancelled = true; if (interval) clearInterval(interval); };
+  }, [query, refreshInterval]);
 
   return { articles, loading, error };
 }

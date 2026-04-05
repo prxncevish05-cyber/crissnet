@@ -53,15 +53,15 @@ export const useAppStore = create<AppState>((set, get) => ({
   incidentVerdict: "pending",
 
   login: (user) => set({ user }),
-  logout: () => set({
+  logout: () => set((s) => ({
     user: null,
     myEmergency: null,
-    ambStatus: "assigned",
-    ambCurrentPos: [...AMB_START],
+    ambStatus: s.ambStatus,
+    ambCurrentPos: s.ambCurrentPos,
     sosState: "idle",
-    sosVideoUrl: null,
-    incidentVerdict: "pending",
-  }),
+    sosVideoUrl: s.sosVideoUrl,
+    incidentVerdict: s.incidentVerdict,
+  })),
 
   fireSOS: (userName) => {
     const { ambulances } = get();
