@@ -53,6 +53,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   sosState: "idle",
   sosVideoUrl: null,
   incidentVerdict: "pending",
+  userLocation: null,
 
   login: (user) => set({ user }),
   logout: () => set((s) => ({
