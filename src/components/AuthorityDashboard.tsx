@@ -5,6 +5,7 @@ import { useToastNotify } from "@/hooks/useToastNotify";
 import TopBar from "@/components/TopBar";
 import MenuPanel from "@/components/MenuPanel";
 import NewsCard from "@/components/NewsCard";
+import HighwayNewsFeed from "@/components/HighwayNewsFeed";
 
 const AuthorityDashboard = () => {
   const notify = useToastNotify();
