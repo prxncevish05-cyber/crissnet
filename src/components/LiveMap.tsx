@@ -30,7 +30,7 @@ interface LiveMapProps {
   userLocation?: { lat: number; lng: number } | null;
 }
 
-const LiveMap = ({ height = 280, autoTrack = false, statusLabel = "🚑 En Route to Patient" }: LiveMapProps) => {
+const LiveMap = ({ height = 280, autoTrack = false, statusLabel = "🚑 En Route to Patient", userLocation }: LiveMapProps) => {
   const { isLoaded } = useJsApiLoader({ googleMapsApiKey: GOOGLE_MAPS_API_KEY });
   const mapRef = useRef<google.maps.Map | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
