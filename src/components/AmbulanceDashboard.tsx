@@ -153,7 +153,7 @@ const AmbulanceDashboard = () => {
                 </div>
               ))}
             </div>
-            <LiveMap height={320} autoTrack={ambStatus === "accepted"} statusLabel="🚑 Navigating · Mumbai-Pune NH-48" />
+            <LiveMap height={320} autoTrack={ambStatus === "accepted"} statusLabel="🚑 Navigating · Mumbai-Pune NH-48" userLocation={ambGeoPos} />
             <div className="rounded-[11px] p-3.5 text-cn-blue font-semibold text-sm" style={{ background: "hsl(var(--cn-blue-light))" }}>
               📍 Patient: Mumbai-Pune Expressway, NH-48, Khopoli Exit
             </div>
