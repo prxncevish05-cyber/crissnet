@@ -40,7 +40,10 @@ const AmbulanceDashboard = () => {
         <div className="rounded-[14px] p-4 pb-3.5" style={{ background: ambStatus !== "resolved" ? "linear-gradient(135deg,#991B1B,#DC2626)" : "linear-gradient(135deg,#065F46,#059669)" }}>
           <div className="text-sm font-bold mb-1" style={{ color: "rgba(255,255,255,.75)" }}>{user?.name}</div>
           <div className="text-xl font-extrabold mb-0.5" style={{ color: "#fff" }}>{ambStatus === "resolved" ? "🟢 Available" : "🔴 On Duty"}</div>
-          <div className="text-xs mb-3" style={{ color: "rgba(255,255,255,.75)" }}>Unit · NH-48 Zone</div>
+          <div className="text-xs mb-1" style={{ color: "rgba(255,255,255,.75)" }}>Unit · NH-48 Zone</div>
+          <div className="text-[11px] mb-2 flex items-center gap-1.5" style={{ color: "rgba(255,255,255,.6)" }}>
+            📍 {geo.loading ? "Detecting location…" : geo.error ? "Location unavailable" : (geo.address || `${geo.lat?.toFixed(4)}°N, ${geo.lng?.toFixed(4)}°E`)}
+          </div>
           <div className="flex gap-2 pb-1">
             {[["7", "Today"], ["6", "Done"]].map(([n, l]) => (
               <div key={l} className="rounded-[10px] px-3.5 py-2 text-center" style={{ background: "rgba(255,255,255,.18)" }}>
