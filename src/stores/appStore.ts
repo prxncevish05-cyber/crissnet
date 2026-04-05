@@ -54,6 +54,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   sosVideoUrl: null,
   incidentVerdict: "pending",
   userLocation: null,
+  ambulanceLocation: null,
 
   login: (user) => set({ user }),
   logout: () => set((s) => ({
