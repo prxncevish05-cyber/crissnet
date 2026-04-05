@@ -51,8 +51,12 @@ const PublicDashboard = () => {
               <div className="mx-4 mt-3 p-3 flex gap-3 items-center rounded-[13px] border-[1.5px]" style={{ background: "#FFF5F5", borderColor: "#FECACA" }}>
                 <div className="w-9 h-9 rounded-full bg-cn-red flex items-center justify-center text-[17px] shrink-0">📍</div>
                 <div>
-                  <div className="text-[9px] font-bold text-cn-red uppercase tracking-wider">Current Location</div>
-                  <div className="font-bold text-sm">Mumbai-Pune Expressway, NH-48</div>
+                  <div className="text-[9px] font-bold text-cn-red uppercase tracking-wider">
+                    {geo.loading ? "Detecting Location…" : "Current Location"}
+                  </div>
+                  <div className="font-bold text-sm">
+                    {geo.loading ? "Acquiring GPS…" : geo.error ? "Mumbai-Pune Expressway, NH-48" : (geo.address || `${geo.lat?.toFixed(4)}°N, ${geo.lng?.toFixed(4)}°E`)}
+                  </div>
                 </div>
               </div>
               <SOSButton />
