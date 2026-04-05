@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAppStore } from "@/stores/appStore";
 import { useToastNotify } from "@/hooks/useToastNotify";
+import useGeolocation from "@/hooks/useGeolocation";
 import TopBar from "@/components/TopBar";
 import MenuPanel from "@/components/MenuPanel";
 import LiveMap from "@/components/LiveMap";
