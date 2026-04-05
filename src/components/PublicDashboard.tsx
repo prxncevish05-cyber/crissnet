@@ -17,10 +17,19 @@ const PublicDashboard = () => {
   const myEmg = useAppStore((s) => s.myEmergency);
   const sosState = useAppStore((s) => s.sosState);
   const news = useAppStore((s) => s.news);
+  const setUserLocation = useAppStore((s) => s.setUserLocation);
   const [menuOpen, setMenuOpen] = useState(false);
   const [tab, setTab] = useState<"alert" | "track" | "news">("alert");
   const [newsFilter, setNewsFilter] = useState("live");
 
+  const geo = useGeolocation();
+  const userPos = geo.lat && geo.lng ? { lat: geo.lat, lng: geo.lng } : null;
+
+  useEffect(() => {
+    if (geo.lat && geo.lng) {
+      setUserLocation([geo.lat, geo.lng]);
+    }
+  }, [geo.lat, geo.lng, setUserLocation]);
   const tabs = [
     { id: "alert" as const, icon: "🚨", label: "Alert" },
     { id: "track" as const, icon: "🗺️", label: "Track" },
