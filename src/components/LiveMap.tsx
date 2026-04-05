@@ -27,9 +27,10 @@ interface LiveMapProps {
   height?: number;
   autoTrack?: boolean;
   statusLabel?: string;
+  userLocation?: { lat: number; lng: number } | null;
 }
 
-const LiveMap = ({ height = 280, autoTrack = false, statusLabel = "🚑 En Route to Patient" }: LiveMapProps) => {
+const LiveMap = ({ height = 280, autoTrack = false, statusLabel = "🚑 En Route to Patient", userLocation }: LiveMapProps) => {
   const { isLoaded } = useJsApiLoader({ googleMapsApiKey: GOOGLE_MAPS_API_KEY });
   const mapRef = useRef<google.maps.Map | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -121,6 +122,14 @@ const LiveMap = ({ height = 280, autoTrack = false, statusLabel = "🚑 En Route
           label={{ text: "🚑", fontSize: "20px" }}
           title="Ambulance Unit-1"
         />
+        {/* User's current location */}
+        {userLocation && (
+          <Marker
+            position={userLocation}
+            label={{ text: "📍", fontSize: "20px" }}
+            title="Your Location"
+          />
+        )}
         {/* Route line */}
         <Polyline
           path={routePath}

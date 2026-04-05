@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAppStore } from "@/stores/appStore";
 import { useToastNotify } from "@/hooks/useToastNotify";
+import useGeolocation from "@/hooks/useGeolocation";
 import TopBar from "@/components/TopBar";
 import MenuPanel from "@/components/MenuPanel";
 import LiveMap from "@/components/LiveMap";
@@ -17,6 +18,9 @@ const AmbulanceDashboard = () => {
   const setIncidentVerdict = useAppStore((s) => s.setIncidentVerdict);
   const [menuOpen, setMenuOpen] = useState(false);
   const [tab, setTab] = useState<"req" | "nav" | "stats">("req");
+
+  const geo = useGeolocation();
+  const ambGeoPos = geo.lat && geo.lng ? { lat: geo.lat, lng: geo.lng } : null;
 
   const emg = emergencies[0];
   const pct = ambStatus === "assigned" ? "20%" : ambStatus === "accepted" ? "65%" : "100%";
@@ -36,7 +40,10 @@ const AmbulanceDashboard = () => {
         <div className="rounded-[14px] p-4 pb-3.5" style={{ background: ambStatus !== "resolved" ? "linear-gradient(135deg,#991B1B,#DC2626)" : "linear-gradient(135deg,#065F46,#059669)" }}>
           <div className="text-sm font-bold mb-1" style={{ color: "rgba(255,255,255,.75)" }}>{user?.name}</div>
           <div className="text-xl font-extrabold mb-0.5" style={{ color: "#fff" }}>{ambStatus === "resolved" ? "🟢 Available" : "🔴 On Duty"}</div>
-          <div className="text-xs mb-3" style={{ color: "rgba(255,255,255,.75)" }}>Unit · NH-48 Zone</div>
+          <div className="text-xs mb-1" style={{ color: "rgba(255,255,255,.75)" }}>Unit · NH-48 Zone</div>
+          <div className="text-[11px] mb-2 flex items-center gap-1.5" style={{ color: "rgba(255,255,255,.6)" }}>
+            📍 {geo.loading ? "Detecting location…" : geo.error ? "Location unavailable" : (geo.address || `${geo.lat?.toFixed(4)}°N, ${geo.lng?.toFixed(4)}°E`)}
+          </div>
           <div className="flex gap-2 pb-1">
             {[["7", "Today"], ["6", "Done"]].map(([n, l]) => (
               <div key={l} className="rounded-[10px] px-3.5 py-2 text-center" style={{ background: "rgba(255,255,255,.18)" }}>
@@ -130,7 +137,7 @@ const AmbulanceDashboard = () => {
               <div className="text-center py-12 text-muted-foreground"><div className="text-[50px]">🚑</div><div className="font-semibold mt-3">No active assignment</div></div>
             )}
             <div className="text-xl font-extrabold mt-1">🗺️ Live Zone Map</div>
-            <LiveMap height={260} autoTrack={ambStatus === "accepted"} statusLabel="🚑 En Route to Patient" />
+            <LiveMap height={260} autoTrack={ambStatus === "accepted"} statusLabel="🚑 En Route to Patient" userLocation={ambGeoPos} />
           </>
         )}
         {tab === "nav" && (
@@ -149,7 +156,7 @@ const AmbulanceDashboard = () => {
                 </div>
               ))}
             </div>
-            <LiveMap height={320} autoTrack={ambStatus === "accepted"} statusLabel="🚑 Navigating · Mumbai-Pune NH-48" />
+            <LiveMap height={320} autoTrack={ambStatus === "accepted"} statusLabel="🚑 Navigating · Mumbai-Pune NH-48" userLocation={ambGeoPos} />
             <div className="rounded-[11px] p-3.5 text-cn-blue font-semibold text-sm" style={{ background: "hsl(var(--cn-blue-light))" }}>
               📍 Patient: Mumbai-Pune Expressway, NH-48, Khopoli Exit
             </div>

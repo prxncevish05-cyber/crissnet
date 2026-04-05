@@ -23,6 +23,7 @@ interface AppState {
   sosState: "idle" | "holding" | "loading" | "activated";
   sosVideoUrl: string | null;
   incidentVerdict: "pending" | "real" | "fake";
+  userLocation: [number, number] | null;
 
   // Actions
   login: (user: User) => void;
@@ -32,6 +33,7 @@ interface AppState {
   acceptRequest: () => void;
   markReached: () => void;
   setAmbPos: (pos: [number, number]) => void;
+  setUserLocation: (pos: [number, number]) => void;
   verifyNews: (id: number, role: string) => void;
   flagNews: (id: number) => void;
   unflagNews: (id: number) => void;
@@ -51,6 +53,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   sosState: "idle",
   sosVideoUrl: null,
   incidentVerdict: "pending",
+  userLocation: null,
 
   login: (user) => set({ user }),
   logout: () => set((s) => ({
@@ -102,6 +105,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   })),
 
   setAmbPos: (pos) => set({ ambCurrentPos: pos }),
+  setUserLocation: (pos) => set({ userLocation: pos }),
 
   verifyNews: (id, role) => set((s) => ({
     news: s.news.map((n) => n.id === id ? { ...n, ver: role, flag: false } : n),

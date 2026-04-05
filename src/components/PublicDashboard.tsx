@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAppStore } from "@/stores/appStore";
 import { useToastNotify } from "@/hooks/useToastNotify";
+import useGeolocation from "@/hooks/useGeolocation";
 import TopBar from "@/components/TopBar";
 import MenuPanel from "@/components/MenuPanel";
 import NewsTicker from "@/components/NewsTicker";
@@ -16,10 +17,19 @@ const PublicDashboard = () => {
   const myEmg = useAppStore((s) => s.myEmergency);
   const sosState = useAppStore((s) => s.sosState);
   const news = useAppStore((s) => s.news);
+  const setUserLocation = useAppStore((s) => s.setUserLocation);
   const [menuOpen, setMenuOpen] = useState(false);
   const [tab, setTab] = useState<"alert" | "track" | "news">("alert");
   const [newsFilter, setNewsFilter] = useState("live");
 
+  const geo = useGeolocation();
+  const userPos = geo.lat && geo.lng ? { lat: geo.lat, lng: geo.lng } : null;
+
+  useEffect(() => {
+    if (geo.lat && geo.lng) {
+      setUserLocation([geo.lat, geo.lng]);
+    }
+  }, [geo.lat, geo.lng, setUserLocation]);
   const tabs = [
     { id: "alert" as const, icon: "🚨", label: "Alert" },
     { id: "track" as const, icon: "🗺️", label: "Track" },
@@ -41,8 +51,12 @@ const PublicDashboard = () => {
               <div className="mx-4 mt-3 p-3 flex gap-3 items-center rounded-[13px] border-[1.5px]" style={{ background: "#FFF5F5", borderColor: "#FECACA" }}>
                 <div className="w-9 h-9 rounded-full bg-cn-red flex items-center justify-center text-[17px] shrink-0">📍</div>
                 <div>
-                  <div className="text-[9px] font-bold text-cn-red uppercase tracking-wider">Current Location</div>
-                  <div className="font-bold text-sm">Mumbai-Pune Expressway, NH-48</div>
+                  <div className="text-[9px] font-bold text-cn-red uppercase tracking-wider">
+                    {geo.loading ? "Detecting Location…" : "Current Location"}
+                  </div>
+                  <div className="font-bold text-sm">
+                    {geo.loading ? "Acquiring GPS…" : geo.error ? "Mumbai-Pune Expressway, NH-48" : (geo.address || `${geo.lat?.toFixed(4)}°N, ${geo.lng?.toFixed(4)}°E`)}
+                  </div>
                 </div>
               </div>
               <SOSButton />
@@ -96,7 +110,7 @@ const PublicDashboard = () => {
                     ))}
                   </div>
                   <div className="mx-4 mt-3">
-                    <LiveMap height={300} autoTrack statusLabel="🚑 En Route · NH-48" />
+                    <LiveMap height={300} autoTrack statusLabel="🚑 En Route · NH-48" userLocation={userPos} />
                   </div>
                 </div>
               )}
