@@ -19,6 +19,9 @@ const AmbulanceDashboard = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [tab, setTab] = useState<"req" | "nav" | "stats">("req");
 
+  const geo = useGeolocation();
+  const ambGeoPos = geo.lat && geo.lng ? { lat: geo.lat, lng: geo.lng } : null;
+
   const emg = emergencies[0];
   const pct = ambStatus === "assigned" ? "20%" : ambStatus === "accepted" ? "65%" : "100%";
   const stage = ambStatus === "assigned" ? "Pending your acceptance" : ambStatus === "accepted" ? "En route to patient" : "Completed";
