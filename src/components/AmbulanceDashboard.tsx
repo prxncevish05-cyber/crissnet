@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAppStore } from "@/stores/appStore";
 import { useToastNotify } from "@/hooks/useToastNotify";
 import useGeolocation from "@/hooks/useGeolocation";
@@ -16,11 +16,21 @@ const AmbulanceDashboard = () => {
   const sosVideoUrl = useAppStore((s) => s.sosVideoUrl);
   const incidentVerdict = useAppStore((s) => s.incidentVerdict);
   const setIncidentVerdict = useAppStore((s) => s.setIncidentVerdict);
+  const setAmbulanceLocation = useAppStore((s) => s.setAmbulanceLocation);
+  const userLocation = useAppStore((s) => s.userLocation);
   const [menuOpen, setMenuOpen] = useState(false);
   const [tab, setTab] = useState<"req" | "nav" | "stats">("req");
 
   const geo = useGeolocation();
   const ambGeoPos = geo.lat && geo.lng ? { lat: geo.lat, lng: geo.lng } : null;
+  const publicUserPos = userLocation ? { lat: userLocation[0], lng: userLocation[1] } : null;
+
+  // Store ambulance GPS location in global state
+  useEffect(() => {
+    if (geo.lat && geo.lng) {
+      setAmbulanceLocation([geo.lat, geo.lng]);
+    }
+  }, [geo.lat, geo.lng, setAmbulanceLocation]);
 
   const emg = emergencies[0];
   const pct = ambStatus === "assigned" ? "20%" : ambStatus === "accepted" ? "65%" : "100%";
@@ -77,6 +87,16 @@ const AmbulanceDashboard = () => {
                   </div>
                   <span className="px-2 py-0.5 rounded-lg text-[11px] font-bold uppercase bg-cn-red-light text-cn-red">{emg.severity}</span>
                 </div>
+                {/* Public user location info */}
+                {publicUserPos && (
+                  <div className="mb-3 rounded-[9px] p-2.5 flex items-center gap-2" style={{ background: "#EFF6FF", border: "1px solid #BFDBFE" }}>
+                    <span className="text-lg">👤</span>
+                    <div>
+                      <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#3B82F6" }}>Public User Live Location</div>
+                      <div className="text-sm font-bold">{publicUserPos.lat.toFixed(4)}°N, {publicUserPos.lng.toFixed(4)}°E</div>
+                    </div>
+                  </div>
+                )}
                 <div className="rounded-[5px] h-2 mb-1" style={{ background: "hsl(var(--cn-gray-1))" }}>
                   <div className="h-full rounded-[5px] transition-all duration-500" style={{ width: pct, background: "linear-gradient(90deg,hsl(var(--cn-red)),hsl(var(--cn-amber)))" }} />
                 </div>
@@ -137,7 +157,7 @@ const AmbulanceDashboard = () => {
               <div className="text-center py-12 text-muted-foreground"><div className="text-[50px]">🚑</div><div className="font-semibold mt-3">No active assignment</div></div>
             )}
             <div className="text-xl font-extrabold mt-1">🗺️ Live Zone Map</div>
-            <LiveMap height={260} autoTrack={ambStatus === "accepted"} statusLabel="🚑 En Route to Patient" userLocation={ambGeoPos} />
+            <LiveMap height={260} autoTrack={ambStatus === "accepted"} statusLabel="🚑 En Route to Patient" userLocation={publicUserPos} ambulanceGpsLocation={ambGeoPos} />
           </>
         )}
         {tab === "nav" && (
@@ -156,7 +176,7 @@ const AmbulanceDashboard = () => {
                 </div>
               ))}
             </div>
-            <LiveMap height={320} autoTrack={ambStatus === "accepted"} statusLabel="🚑 Navigating · Mumbai-Pune NH-48" userLocation={ambGeoPos} />
+            <LiveMap height={320} autoTrack={ambStatus === "accepted"} statusLabel="🚑 Navigating · Mumbai-Pune NH-48" userLocation={publicUserPos} ambulanceGpsLocation={ambGeoPos} />
             <div className="rounded-[11px] p-3.5 text-cn-blue font-semibold text-sm" style={{ background: "hsl(var(--cn-blue-light))" }}>
               📍 Patient: Mumbai-Pune Expressway, NH-48, Khopoli Exit
             </div>

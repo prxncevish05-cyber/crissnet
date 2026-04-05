@@ -24,6 +24,7 @@ interface AppState {
   sosVideoUrl: string | null;
   incidentVerdict: "pending" | "real" | "fake";
   userLocation: [number, number] | null;
+  ambulanceLocation: [number, number] | null;
 
   // Actions
   login: (user: User) => void;
@@ -34,6 +35,7 @@ interface AppState {
   markReached: () => void;
   setAmbPos: (pos: [number, number]) => void;
   setUserLocation: (pos: [number, number]) => void;
+  setAmbulanceLocation: (pos: [number, number]) => void;
   verifyNews: (id: number, role: string) => void;
   flagNews: (id: number) => void;
   unflagNews: (id: number) => void;
