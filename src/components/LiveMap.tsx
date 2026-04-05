@@ -27,6 +27,7 @@ interface LiveMapProps {
   height?: number;
   autoTrack?: boolean;
   statusLabel?: string;
+  userLocation?: { lat: number; lng: number } | null;
 }
 
 const LiveMap = ({ height = 280, autoTrack = false, statusLabel = "🚑 En Route to Patient" }: LiveMapProps) => {
