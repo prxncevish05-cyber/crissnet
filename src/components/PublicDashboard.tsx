@@ -18,12 +18,14 @@ const PublicDashboard = () => {
   const sosState = useAppStore((s) => s.sosState);
   const news = useAppStore((s) => s.news);
   const setUserLocation = useAppStore((s) => s.setUserLocation);
+  const ambulanceLocation = useAppStore((s) => s.ambulanceLocation);
   const [menuOpen, setMenuOpen] = useState(false);
   const [tab, setTab] = useState<"alert" | "track" | "news">("alert");
   const [newsFilter, setNewsFilter] = useState("live");
 
   const geo = useGeolocation();
   const userPos = geo.lat && geo.lng ? { lat: geo.lat, lng: geo.lng } : null;
+  const ambGpsPos = ambulanceLocation ? { lat: ambulanceLocation[0], lng: ambulanceLocation[1] } : null;
 
   useEffect(() => {
     if (geo.lat && geo.lng) {
@@ -110,7 +112,7 @@ const PublicDashboard = () => {
                     ))}
                   </div>
                   <div className="mx-4 mt-3">
-                    <LiveMap height={300} autoTrack statusLabel="🚑 En Route · NH-48" userLocation={userPos} />
+                    <LiveMap height={300} autoTrack statusLabel="🚑 En Route · NH-48" userLocation={userPos} ambulanceGpsLocation={ambGpsPos} />
                   </div>
                 </div>
               )}

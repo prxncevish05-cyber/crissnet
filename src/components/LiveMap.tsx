@@ -28,13 +28,17 @@ interface LiveMapProps {
   autoTrack?: boolean;
   statusLabel?: string;
   userLocation?: { lat: number; lng: number } | null;
+  ambulanceGpsLocation?: { lat: number; lng: number } | null;
+  showAllLocations?: boolean;
 }
 
-const LiveMap = ({ height = 280, autoTrack = false, statusLabel = "🚑 En Route to Patient", userLocation }: LiveMapProps) => {
+const LiveMap = ({ height = 280, autoTrack = false, statusLabel = "🚑 En Route to Patient", userLocation, ambulanceGpsLocation, showAllLocations = false }: LiveMapProps) => {
   const { isLoaded } = useJsApiLoader({ googleMapsApiKey: GOOGLE_MAPS_API_KEY });
   const mapRef = useRef<google.maps.Map | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const setAmbPos = useAppStore((s) => s.setAmbPos);
+  const storeUserLocation = useAppStore((s) => s.userLocation);
+  const storeAmbulanceLocation = useAppStore((s) => s.ambulanceLocation);
 
   const [ambPosition, setAmbPosition] = useState<{ lat: number; lng: number }>({ lat: AMB_START[0], lng: AMB_START[1] });
   const [eta, setEta] = useState("—");
@@ -43,11 +47,17 @@ const LiveMap = ({ height = 280, autoTrack = false, statusLabel = "🚑 En Route
 
   const patientPos = { lat: PATIENT_COORD[0], lng: PATIENT_COORD[1] };
 
+  // Derive displayed locations
+  const publicUserPos = userLocation || (storeUserLocation ? { lat: storeUserLocation[0], lng: storeUserLocation[1] } : null);
+  const ambGpsPos = ambulanceGpsLocation || (storeAmbulanceLocation ? { lat: storeAmbulanceLocation[0], lng: storeAmbulanceLocation[1] } : null);
+
   const onLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
     const bounds = new google.maps.LatLngBounds();
     bounds.extend(patientPos);
     bounds.extend({ lat: AMB_START[0], lng: AMB_START[1] });
+    if (publicUserPos) bounds.extend(publicUserPos);
+    if (ambGpsPos) bounds.extend(ambGpsPos);
     map.fitBounds(bounds, 50);
   }, []);
 
@@ -110,24 +120,32 @@ const LiveMap = ({ height = 280, autoTrack = false, statusLabel = "🚑 En Route
         zoom={13}
         center={{ lat: (PATIENT_COORD[0] + AMB_START[0]) / 2, lng: (PATIENT_COORD[1] + AMB_START[1]) / 2 }}
       >
-        {/* Patient marker */}
+        {/* Patient / SOS marker */}
         <Marker
           position={patientPos}
           label={{ text: "🆘", fontSize: "20px" }}
           title="Patient · NH-48"
         />
-        {/* Ambulance marker */}
+        {/* Ambulance animated marker */}
         <Marker
           position={ambPosition}
           label={{ text: "🚑", fontSize: "20px" }}
           title="Ambulance Unit-1"
         />
-        {/* User's current location */}
-        {userLocation && (
+        {/* Public user's current GPS location */}
+        {publicUserPos && (
           <Marker
-            position={userLocation}
-            label={{ text: "📍", fontSize: "20px" }}
-            title="Your Location"
+            position={publicUserPos}
+            label={{ text: "👤", fontSize: "18px" }}
+            title="Public User Location"
+          />
+        )}
+        {/* Ambulance crew's real GPS location */}
+        {ambGpsPos && (
+          <Marker
+            position={ambGpsPos}
+            label={{ text: "📍🚑", fontSize: "16px" }}
+            title="Ambulance GPS Location"
           />
         )}
         {/* Route line */}
@@ -147,6 +165,22 @@ const LiveMap = ({ height = 280, autoTrack = false, statusLabel = "🚑 En Route
         <div className="w-2 h-2 rounded-full bg-cn-green cn-animate-ping" />
         <span className="text-xs font-bold text-foreground">{statusLabel}</span>
       </div>
+
+      {/* Location info pills */}
+      {(publicUserPos || ambGpsPos) && (
+        <div className="absolute top-12 left-1/2 -translate-x-1/2 flex gap-2 z-[999] pointer-events-none">
+          {publicUserPos && (
+            <div className="rounded-full px-3 py-1 text-[10px] font-bold border border-border" style={{ background: "rgba(59,130,246,.9)", color: "#fff" }}>
+              👤 {publicUserPos.lat.toFixed(4)}°, {publicUserPos.lng.toFixed(4)}°
+            </div>
+          )}
+          {ambGpsPos && (
+            <div className="rounded-full px-3 py-1 text-[10px] font-bold border border-border" style={{ background: "rgba(220,38,38,.9)", color: "#fff" }}>
+              🚑 {ambGpsPos.lat.toFixed(4)}°, {ambGpsPos.lng.toFixed(4)}°
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Bottom pill */}
       <div className="absolute bottom-3.5 left-1/2 -translate-x-1/2 rounded-full px-4 py-2.5 flex items-center gap-3.5 z-[999] pointer-events-none whitespace-nowrap"
