@@ -105,6 +105,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   })),
 
   setAmbPos: (pos) => set({ ambCurrentPos: pos }),
+  setUserLocation: (pos) => set({ userLocation: pos }),
 
   verifyNews: (id, role) => set((s) => ({
     news: s.news.map((n) => n.id === id ? { ...n, ver: role, flag: false } : n),
