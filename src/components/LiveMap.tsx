@@ -117,7 +117,7 @@ const LiveMap = ({ height = 280, autoTrack = false, statusLabel = "🚑 En Route
     );
   }
 
-  const routePath = [ambPosition, patientPos];
+  const routePath = autoTrack ? [ambPosition, patientPos] : [];
 
   return (
     <div className="relative rounded-[14px] overflow-hidden border border-border" style={{ boxShadow: "var(--cn-shadow)" }}>
