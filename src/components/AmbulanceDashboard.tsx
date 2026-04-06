@@ -5,6 +5,20 @@ import useGeolocation from "@/hooks/useGeolocation";
 import TopBar from "@/components/TopBar";
 import MenuPanel from "@/components/MenuPanel";
 import LiveMap from "@/components/LiveMap";
+import { supabase } from "@/integrations/supabase/client";
+
+interface HistoryRecord {
+  id: string;
+  patient_name: string;
+  location: string;
+  status: string;
+  severity: string;
+  created_at: string;
+  accepted_at: string | null;
+  resolved_at: string | null;
+  distance: string | null;
+  eta: number | null;
+}
 
 const AmbulanceDashboard = () => {
   const notify = useToastNotify();
@@ -20,6 +34,20 @@ const AmbulanceDashboard = () => {
   const userLocation = useAppStore((s) => s.userLocation);
   const [menuOpen, setMenuOpen] = useState(false);
   const [tab, setTab] = useState<"req" | "nav" | "stats">("req");
+  const [history, setHistory] = useState<HistoryRecord[]>([]);
+
+  // Load ambulance history from database
+  useEffect(() => {
+    const loadHistory = async () => {
+      const { data } = await supabase
+        .from("ambulance_history")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (data) setHistory(data as HistoryRecord[]);
+    };
+    loadHistory();
+  }, [ambStatus]);
 
   const geo = useGeolocation();
   const ambGeoPos = geo.lat && geo.lng ? { lat: geo.lat, lng: geo.lng } : null;
@@ -104,14 +132,52 @@ const AmbulanceDashboard = () => {
                 <div className="flex gap-2.5 flex-wrap">
                   {ambStatus === "assigned" && (
                     <>
-                      <button onClick={() => { acceptRequest(); notify("Accepted", "Live tracking started", "ok"); }}
+                      <button onClick={async () => {
+                        acceptRequest();
+                        // Save to ambulance_history
+                        const { data: { user: authUser } } = await supabase.auth.getUser();
+                        if (emg && authUser) {
+                          await supabase.from("ambulance_history").insert({
+                            ambulance_user_id: authUser.id,
+                            patient_name: emg.userName,
+                            location: emg.location,
+                            latitude: emg.lat,
+                            longitude: emg.lng,
+                            severity: emg.severity,
+                            status: "accepted",
+                            distance: emg.distance,
+                            eta: emg.eta,
+                            accepted_at: new Date().toISOString(),
+                          });
+                        }
+                        notify("Accepted", "Live tracking started", "ok");
+                      }}
                         className="px-4 py-2 rounded-[9px] bg-cn-green-light text-cn-green font-bold text-sm">✅ Accept</button>
                       <button onClick={() => notify("Declined", "Another unit will be dispatched", "warn")}
                         className="px-4 py-2 rounded-[9px] bg-cn-red-light text-cn-red font-bold text-sm">❌ Decline</button>
                     </>
                   )}
                   {ambStatus === "accepted" && (
-                    <button onClick={() => { markReached(); notify("Reached Patient", "Ambulance now available again", "ok"); }}
+                    <button onClick={async () => {
+                      markReached();
+                      // Update history record
+                      const { data: { user: authUser } } = await supabase.auth.getUser();
+                      if (authUser) {
+                        const { data: records } = await supabase
+                          .from("ambulance_history")
+                          .select("id")
+                          .eq("ambulance_user_id", authUser.id)
+                          .eq("status", "accepted")
+                          .order("created_at", { ascending: false })
+                          .limit(1);
+                        if (records?.[0]) {
+                          await supabase.from("ambulance_history")
+                            .update({ status: "resolved", resolved_at: new Date().toISOString() })
+                            .eq("id", records[0].id);
+                        }
+                      }
+                      notify("Reached Patient", "Ambulance now available again", "ok");
+                    }}
                       className="px-5 py-2 rounded-[9px] bg-cn-blue font-bold text-sm" style={{ color: "#fff" }}>🏁 Mark Reached</button>
                   )}
                   {ambStatus === "resolved" && <span className="text-cn-green font-bold text-sm">✅ Completed</span>}
@@ -186,20 +252,38 @@ const AmbulanceDashboard = () => {
           <>
             <div className="text-xl font-extrabold">📊 My Performance</div>
             <div className="grid grid-cols-2 gap-3">
-              {[["🚑", "247", "Total Calls", "text-cn-red"], ["✅", "241", "Completed", "text-cn-green"], ["⏱️", "3.8 min", "Avg ETA", "text-cn-blue"], ["⭐", "4.9/5", "Rating", "text-cn-amber"]].map(([i, v, l, c]) => (
+              {[["🚑", String(history.length), "Total Calls", "text-cn-red"],
+                ["✅", String(history.filter(h => h.status === "resolved").length), "Completed", "text-cn-green"],
+                ["⏱️", history.length ? (history.reduce((s, h) => s + (h.eta || 0), 0) / history.length).toFixed(1) + " min" : "— min", "Avg ETA", "text-cn-blue"],
+                ["⭐", "4.9/5", "Rating", "text-cn-amber"]
+              ].map(([i, v, l, c]) => (
                 <div key={l} className="bg-card rounded-[13px] border border-border p-4 text-center shadow-cn">
                   <div className="text-[26px]">{i}</div><div className={`text-[26px] font-extrabold mt-1 ${c}`}>{v}</div><div className="text-xs text-muted-foreground font-semibold">{l}</div>
                 </div>
               ))}
             </div>
             <div className="bg-card rounded-[13px] border border-border p-4">
-              <div className="text-base font-bold mb-3">Today's History</div>
-              {[["Accident NH-48 Km 42", "09:14"], ["Medical Emergency Pune", "07:32"], ["Accident near Khalapur", "06:10"]].map(([t, time]) => (
-                <div key={t} className="flex justify-between py-2 border-b border-cn-gray-0 items-center">
-                  <div><div className="font-semibold text-sm">{t}</div><div className="text-[11px] text-muted-foreground">{time}</div></div>
-                  <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-cn-green-light text-cn-green">Resolved</span>
-                </div>
-              ))}
+              <div className="text-base font-bold mb-3">📋 Ambulance History</div>
+              {history.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground text-sm">No records yet. Accept an emergency to start tracking.</div>
+              ) : (
+                history.map((h) => (
+                  <div key={h.id} className="flex justify-between py-2.5 border-b border-cn-gray-0 items-center">
+                    <div>
+                      <div className="font-semibold text-sm">👤 {h.patient_name}</div>
+                      <div className="text-[11px] text-muted-foreground">📍 {h.location}</div>
+                      <div className="text-[11px] text-muted-foreground">
+                        {new Date(h.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                        {h.distance && ` · ${h.distance} km`}
+                        {h.eta && ` · ETA ${h.eta} min`}
+                      </div>
+                    </div>
+                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${h.status === "resolved" ? "bg-cn-green-light text-cn-green" : "bg-cn-amber-light text-cn-amber"}`}>
+                      {h.status === "resolved" ? "✅ Resolved" : "🔄 " + h.status}
+                    </span>
+                  </div>
+                ))
+              )}
             </div>
           </>
         )}

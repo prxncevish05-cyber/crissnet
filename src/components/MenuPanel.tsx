@@ -1,6 +1,7 @@
 import { useAppStore } from "@/stores/appStore";
 import { ROLE_CONFIG } from "@/lib/constants";
 import { useToastNotify } from "@/hooks/useToastNotify";
+import { supabase } from "@/integrations/supabase/client";
 
 interface MenuPanelProps {
   open: boolean;
@@ -44,7 +45,7 @@ const MenuPanel = ({ open, onClose }: MenuPanelProps) => {
               <span className="text-lg w-6 text-center">{item.icon}</span>{item.label}
             </button>
           ))}
-          <button onClick={() => { onClose(); logout(); }} className="w-full flex items-center gap-3 px-5 py-3 text-sm font-medium text-cn-red text-left">
+          <button onClick={async () => { onClose(); await supabase.auth.signOut(); logout(); }} className="w-full flex items-center gap-3 px-5 py-3 text-sm font-medium text-cn-red text-left">
             <span className="text-lg w-6 text-center">🚪</span>Logout
           </button>
         </div>

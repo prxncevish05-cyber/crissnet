@@ -1,7 +1,8 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef } from "react";
 import { ROLE_CONFIG, type UserRole } from "@/lib/constants";
 import { useAppStore } from "@/stores/appStore";
 import { useToastNotify } from "@/hooks/useToastNotify";
+import { supabase } from "@/integrations/supabase/client";
 
 const LoginPage = () => {
   const notify = useToastNotify();
@@ -13,17 +14,38 @@ const LoginPage = () => {
   const [otpValues, setOtpValues] = useState(["", "", "", "", "", ""]);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const roles: UserRole[] = ["public", "ambulance", "police", "hospital", "nhai"];
 
-  const handleSendOTP = () => {
+  // Use phone as email: phone@crissnet.app
+  const phoneToEmail = (p: string) => `${p}@crissnet.app`;
+
+  const handleSendOTP = async () => {
     if (phone.length < 10) { notify("Invalid number", "Please enter a valid 10-digit mobile number", "err"); return; }
     if (!name.trim()) { notify("Name required", "Please enter your full name", "err"); return; }
     setSending(true);
     setSent(false);
     setOtpValues(["", "", "", "", "", ""]);
     setStep("otp");
+
+    try {
+      const email = phoneToEmail(phone);
+      // Try signup first, if user exists it will fail, then we sign in
+      const { error: signUpError } = await supabase.auth.signUp({
+        email,
+        password: `CrissNet@${phone}#2024`,
+      });
+
+      // If user already exists, that's fine — we'll sign in during verify
+      if (signUpError && !signUpError.message.includes("already registered")) {
+        console.log("Signup note:", signUpError.message);
+      }
+    } catch (err) {
+      console.error("Auth error:", err);
+    }
+
     setTimeout(() => {
       setSending(false);
       setSent(true);
@@ -46,7 +68,7 @@ const LoginPage = () => {
     if (key === "Backspace" && !otpValues[idx] && idx > 0) otpRefs.current[idx - 1]?.focus();
   };
 
-  const verifyOTP = (code?: string) => {
+  const verifyOTP = async (code?: string) => {
     const c = code || otpValues.join("");
     if (c.length < 6) return;
     if (c !== "123456") {
@@ -55,7 +77,62 @@ const LoginPage = () => {
       otpRefs.current[0]?.focus();
       return;
     }
+
+    setLoading(true);
+    try {
+      const email = phoneToEmail(phone);
+      const password = `CrissNet@${phone}#2024`;
+
+      // Sign in
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        // If sign in fails, try signup + signin
+        await supabase.auth.signUp({ email, password });
+        const { data: retryData, error: retryError } = await supabase.auth.signInWithPassword({ email, password });
+        if (retryError) {
+          notify("Login Failed", retryError.message, "err");
+          setLoading(false);
+          return;
+        }
+        if (retryData.user) {
+          await upsertProfile(retryData.user.id);
+        }
+      } else if (signInData.user) {
+        await upsertProfile(signInData.user.id);
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      notify("Error", "Something went wrong", "err");
+    }
+    setLoading(false);
+  };
+
+  const upsertProfile = async (userId: string) => {
     const av = name.split(" ").filter(Boolean).map((w) => w[0]).join("").toUpperCase().slice(0, 2) || "??";
+
+    // Check if profile exists
+    const { data: existing } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (existing) {
+      // Update role/name if needed
+      await supabase
+        .from("profiles")
+        .update({ name: name.trim(), role: role, phone })
+        .eq("user_id", userId);
+    } else {
+      await supabase
+        .from("profiles")
+        .insert({ user_id: userId, name: name.trim(), phone, role, avatar: av });
+    }
+
     login({ role, name: name.trim(), phone, avatar: av });
     notify("Welcome, " + name + "!", "Logged in as " + ROLE_CONFIG[role].label + " 🎉", "ok");
   };
@@ -159,8 +236,11 @@ const LoginPage = () => {
                   />
                 ))}
               </div>
-              <button onClick={() => verifyOTP()} className="w-full py-3.5 rounded-[11px] text-base font-bold text-primary-foreground flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
-                style={{ background: rc.grad }}>✅ Verify & Enter Dashboard</button>
+              <button onClick={() => verifyOTP()} disabled={loading}
+                className="w-full py-3.5 rounded-[11px] text-base font-bold text-primary-foreground flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50"
+                style={{ background: rc.grad }}>
+                {loading ? "Signing in…" : "✅ Verify & Enter Dashboard"}
+              </button>
               <div className="text-center text-[11px] text-muted-foreground mt-2.5">Demo OTP: <strong className="text-cn-red text-[15px] tracking-[4px]">1 2 3 4 5 6</strong></div>
               <div className="text-center mt-3">
                 <button onClick={() => { setSending(true); setSent(false); setOtpValues(["","","","","",""]); setTimeout(() => { setSending(false); setSent(true); notify("OTP Resent", "Enter the 6-digit code", "ok"); otpRefs.current[0]?.focus(); }, 1500); }}
