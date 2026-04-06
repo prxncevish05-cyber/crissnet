@@ -158,7 +158,26 @@ const AmbulanceDashboard = () => {
                     </>
                   )}
                   {ambStatus === "accepted" && (
-                    <button onClick={() => { markReached(); notify("Reached Patient", "Ambulance now available again", "ok"); }}
+                    <button onClick={async () => {
+                      markReached();
+                      // Update history record
+                      const { data: { user: authUser } } = await supabase.auth.getUser();
+                      if (authUser) {
+                        const { data: records } = await supabase
+                          .from("ambulance_history")
+                          .select("id")
+                          .eq("ambulance_user_id", authUser.id)
+                          .eq("status", "accepted")
+                          .order("created_at", { ascending: false })
+                          .limit(1);
+                        if (records?.[0]) {
+                          await supabase.from("ambulance_history")
+                            .update({ status: "resolved", resolved_at: new Date().toISOString() })
+                            .eq("id", records[0].id);
+                        }
+                      }
+                      notify("Reached Patient", "Ambulance now available again", "ok");
+                    }}
                       className="px-5 py-2 rounded-[9px] bg-cn-blue font-bold text-sm" style={{ color: "#fff" }}>🏁 Mark Reached</button>
                   )}
                   {ambStatus === "resolved" && <span className="text-cn-green font-bold text-sm">✅ Completed</span>}
