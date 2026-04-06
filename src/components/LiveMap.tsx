@@ -53,13 +53,21 @@ const LiveMap = ({ height = 280, autoTrack = false, statusLabel = "🚑 En Route
 
   const onLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
-    const bounds = new google.maps.LatLngBounds();
-    bounds.extend(patientPos);
-    bounds.extend({ lat: AMB_START[0], lng: AMB_START[1] });
-    if (publicUserPos) bounds.extend(publicUserPos);
-    if (ambGpsPos) bounds.extend(ambGpsPos);
-    map.fitBounds(bounds, 50);
-  }, []);
+    if (autoTrack) {
+      const bounds = new google.maps.LatLngBounds();
+      bounds.extend(patientPos);
+      bounds.extend({ lat: AMB_START[0], lng: AMB_START[1] });
+      if (publicUserPos) bounds.extend(publicUserPos);
+      if (ambGpsPos) bounds.extend(ambGpsPos);
+      map.fitBounds(bounds, 50);
+    } else if (publicUserPos) {
+      map.setCenter(publicUserPos);
+      map.setZoom(15);
+    } else if (ambGpsPos) {
+      map.setCenter(ambGpsPos);
+      map.setZoom(15);
+    }
+  }, [autoTrack, publicUserPos, ambGpsPos]);
 
   useEffect(() => {
     if (!autoTrack || !isLoaded) return;
@@ -109,7 +117,7 @@ const LiveMap = ({ height = 280, autoTrack = false, statusLabel = "🚑 En Route
     );
   }
 
-  const routePath = [ambPosition, patientPos];
+  const routePath = autoTrack ? [ambPosition, patientPos] : [];
 
   return (
     <div className="relative rounded-[14px] overflow-hidden border border-border" style={{ boxShadow: "var(--cn-shadow)" }}>
@@ -117,8 +125,8 @@ const LiveMap = ({ height = 280, autoTrack = false, statusLabel = "🚑 En Route
         mapContainerStyle={mapContainerStyle(height)}
         options={defaultOptions}
         onLoad={onLoad}
-        zoom={13}
-        center={{ lat: (PATIENT_COORD[0] + AMB_START[0]) / 2, lng: (PATIENT_COORD[1] + AMB_START[1]) / 2 }}
+        zoom={15}
+        center={publicUserPos || ambGpsPos || { lat: 20.5937, lng: 78.9629 }}
       >
         {/* Patient / SOS marker - only when tracking active */}
         {autoTrack && (
@@ -152,15 +160,17 @@ const LiveMap = ({ height = 280, autoTrack = false, statusLabel = "🚑 En Route
             title="Ambulance GPS Location"
           />
         )}
-        {/* Route line */}
-        <Polyline
-          path={routePath}
-          options={{
-            strokeColor: "#1D4ED8",
-            strokeOpacity: 0.85,
-            strokeWeight: 5,
-          }}
-        />
+        {/* Route line - only when tracking */}
+        {autoTrack && routePath.length > 0 && (
+          <Polyline
+            path={routePath}
+            options={{
+              strokeColor: "#1D4ED8",
+              strokeOpacity: 0.85,
+              strokeWeight: 5,
+            }}
+          />
+        )}
       </GoogleMap>
 
       {/* Status bar */}
