@@ -53,13 +53,21 @@ const LiveMap = ({ height = 280, autoTrack = false, statusLabel = "🚑 En Route
 
   const onLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
-    const bounds = new google.maps.LatLngBounds();
-    bounds.extend(patientPos);
-    bounds.extend({ lat: AMB_START[0], lng: AMB_START[1] });
-    if (publicUserPos) bounds.extend(publicUserPos);
-    if (ambGpsPos) bounds.extend(ambGpsPos);
-    map.fitBounds(bounds, 50);
-  }, []);
+    if (autoTrack) {
+      const bounds = new google.maps.LatLngBounds();
+      bounds.extend(patientPos);
+      bounds.extend({ lat: AMB_START[0], lng: AMB_START[1] });
+      if (publicUserPos) bounds.extend(publicUserPos);
+      if (ambGpsPos) bounds.extend(ambGpsPos);
+      map.fitBounds(bounds, 50);
+    } else if (publicUserPos) {
+      map.setCenter(publicUserPos);
+      map.setZoom(15);
+    } else if (ambGpsPos) {
+      map.setCenter(ambGpsPos);
+      map.setZoom(15);
+    }
+  }, [autoTrack, publicUserPos, ambGpsPos]);
 
   useEffect(() => {
     if (!autoTrack || !isLoaded) return;
