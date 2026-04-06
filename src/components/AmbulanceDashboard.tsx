@@ -132,7 +132,26 @@ const AmbulanceDashboard = () => {
                 <div className="flex gap-2.5 flex-wrap">
                   {ambStatus === "assigned" && (
                     <>
-                      <button onClick={() => { acceptRequest(); notify("Accepted", "Live tracking started", "ok"); }}
+                      <button onClick={async () => {
+                        acceptRequest();
+                        // Save to ambulance_history
+                        const { data: { user: authUser } } = await supabase.auth.getUser();
+                        if (emg && authUser) {
+                          await supabase.from("ambulance_history").insert({
+                            ambulance_user_id: authUser.id,
+                            patient_name: emg.userName,
+                            location: emg.location,
+                            latitude: emg.lat,
+                            longitude: emg.lng,
+                            severity: emg.severity,
+                            status: "accepted",
+                            distance: emg.distance,
+                            eta: emg.eta,
+                            accepted_at: new Date().toISOString(),
+                          });
+                        }
+                        notify("Accepted", "Live tracking started", "ok");
+                      }}
                         className="px-4 py-2 rounded-[9px] bg-cn-green-light text-cn-green font-bold text-sm">✅ Accept</button>
                       <button onClick={() => notify("Declined", "Another unit will be dispatched", "warn")}
                         className="px-4 py-2 rounded-[9px] bg-cn-red-light text-cn-red font-bold text-sm">❌ Decline</button>
