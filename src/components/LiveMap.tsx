@@ -125,8 +125,8 @@ const LiveMap = ({ height = 280, autoTrack = false, statusLabel = "🚑 En Route
         mapContainerStyle={mapContainerStyle(height)}
         options={defaultOptions}
         onLoad={onLoad}
-        zoom={13}
-        center={{ lat: (PATIENT_COORD[0] + AMB_START[0]) / 2, lng: (PATIENT_COORD[1] + AMB_START[1]) / 2 }}
+        zoom={15}
+        center={publicUserPos || ambGpsPos || { lat: 20.5937, lng: 78.9629 }}
       >
         {/* Patient / SOS marker - only when tracking active */}
         {autoTrack && (
