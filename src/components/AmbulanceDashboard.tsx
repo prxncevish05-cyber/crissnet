@@ -5,6 +5,20 @@ import useGeolocation from "@/hooks/useGeolocation";
 import TopBar from "@/components/TopBar";
 import MenuPanel from "@/components/MenuPanel";
 import LiveMap from "@/components/LiveMap";
+import { supabase } from "@/integrations/supabase/client";
+
+interface HistoryRecord {
+  id: string;
+  patient_name: string;
+  location: string;
+  status: string;
+  severity: string;
+  created_at: string;
+  accepted_at: string | null;
+  resolved_at: string | null;
+  distance: string | null;
+  eta: number | null;
+}
 
 const AmbulanceDashboard = () => {
   const notify = useToastNotify();
