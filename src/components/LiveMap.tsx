@@ -120,18 +120,22 @@ const LiveMap = ({ height = 280, autoTrack = false, statusLabel = "🚑 En Route
         zoom={13}
         center={{ lat: (PATIENT_COORD[0] + AMB_START[0]) / 2, lng: (PATIENT_COORD[1] + AMB_START[1]) / 2 }}
       >
-        {/* Patient / SOS marker */}
-        <Marker
-          position={patientPos}
-          label={{ text: "🆘", fontSize: "20px" }}
-          title="Patient · NH-48"
-        />
-        {/* Ambulance animated marker */}
-        <Marker
-          position={ambPosition}
-          label={{ text: "🚑", fontSize: "20px" }}
-          title="Ambulance Unit-1"
-        />
+        {/* Patient / SOS marker - only when tracking active */}
+        {autoTrack && (
+          <Marker
+            position={patientPos}
+            label={{ text: "🆘", fontSize: "20px" }}
+            title="Patient · NH-48"
+          />
+        )}
+        {/* Ambulance animated marker - only when tracking active */}
+        {autoTrack && (
+          <Marker
+            position={ambPosition}
+            label={{ text: "🚑", fontSize: "20px" }}
+            title="Ambulance Unit-1"
+          />
+        )}
         {/* Public user's current GPS location */}
         {publicUserPos && (
           <Marker
