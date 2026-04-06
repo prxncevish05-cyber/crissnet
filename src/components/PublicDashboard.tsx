@@ -112,7 +112,7 @@ const PublicDashboard = () => {
                     ))}
                   </div>
                   <div className="mx-4 mt-3">
-                    <LiveMap height={300} autoTrack statusLabel="🚑 En Route · NH-48" userLocation={userPos} ambulanceGpsLocation={ambGpsPos} />
+                    <LiveMap height={300} autoTrack statusLabel="🚑 Ambulance En Route" userLocation={userPos} ambulanceGpsLocation={ambGpsPos} />
                   </div>
                 </div>
               )}
