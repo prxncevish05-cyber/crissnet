@@ -1,6 +1,7 @@
 import { useAppStore } from "@/stores/appStore";
 import { ROLE_CONFIG } from "@/lib/constants";
 import { useToastNotify } from "@/hooks/useToastNotify";
+import { supabase } from "@/integrations/supabase/client";
 
 interface MenuPanelProps {
   open: boolean;
