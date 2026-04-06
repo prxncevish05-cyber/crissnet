@@ -14,7 +14,90 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ambulance_history: {
+        Row: {
+          accepted_at: string | null
+          ambulance_user_id: string | null
+          created_at: string
+          distance: string | null
+          eta: number | null
+          id: string
+          latitude: number | null
+          location: string
+          longitude: number | null
+          patient_name: string
+          patient_phone: string | null
+          resolved_at: string | null
+          severity: string
+          status: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          ambulance_user_id?: string | null
+          created_at?: string
+          distance?: string | null
+          eta?: number | null
+          id?: string
+          latitude?: number | null
+          location: string
+          longitude?: number | null
+          patient_name: string
+          patient_phone?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          ambulance_user_id?: string | null
+          created_at?: string
+          distance?: string | null
+          eta?: number | null
+          id?: string
+          latitude?: number | null
+          location?: string
+          longitude?: number | null
+          patient_name?: string
+          patient_phone?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar: string | null
+          created_at: string
+          id: string
+          name: string
+          phone: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          phone: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          phone?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +106,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      app_role: "public" | "ambulance" | "police" | "hospital" | "nhai"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +233,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["public", "ambulance", "police", "hospital", "nhai"],
+    },
   },
 } as const
