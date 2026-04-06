@@ -157,7 +157,7 @@ const AmbulanceDashboard = () => {
               <div className="text-center py-12 text-muted-foreground"><div className="text-[50px]">🚑</div><div className="font-semibold mt-3">No active assignment</div></div>
             )}
             <div className="text-xl font-extrabold mt-1">🗺️ Live Zone Map</div>
-            <LiveMap height={260} autoTrack={ambStatus === "accepted"} statusLabel="🚑 En Route to Patient" userLocation={publicUserPos} ambulanceGpsLocation={ambGeoPos} />
+            <LiveMap height={260} autoTrack={ambStatus === "accepted"} statusLabel={ambStatus === "accepted" ? "🚑 En Route to Patient" : "📍 Your Location"} userLocation={publicUserPos} ambulanceGpsLocation={ambGeoPos} />
           </>
         )}
         {tab === "nav" && (
