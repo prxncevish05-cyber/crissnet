@@ -34,6 +34,20 @@ const AmbulanceDashboard = () => {
   const userLocation = useAppStore((s) => s.userLocation);
   const [menuOpen, setMenuOpen] = useState(false);
   const [tab, setTab] = useState<"req" | "nav" | "stats">("req");
+  const [history, setHistory] = useState<HistoryRecord[]>([]);
+
+  // Load ambulance history from database
+  useEffect(() => {
+    const loadHistory = async () => {
+      const { data } = await supabase
+        .from("ambulance_history")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (data) setHistory(data as HistoryRecord[]);
+    };
+    loadHistory();
+  }, [ambStatus]);
 
   const geo = useGeolocation();
   const ambGeoPos = geo.lat && geo.lng ? { lat: geo.lat, lng: geo.lng } : null;
