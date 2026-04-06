@@ -160,15 +160,17 @@ const LiveMap = ({ height = 280, autoTrack = false, statusLabel = "🚑 En Route
             title="Ambulance GPS Location"
           />
         )}
-        {/* Route line */}
-        <Polyline
-          path={routePath}
-          options={{
-            strokeColor: "#1D4ED8",
-            strokeOpacity: 0.85,
-            strokeWeight: 5,
-          }}
-        />
+        {/* Route line - only when tracking */}
+        {autoTrack && routePath.length > 0 && (
+          <Polyline
+            path={routePath}
+            options={{
+              strokeColor: "#1D4ED8",
+              strokeOpacity: 0.85,
+              strokeWeight: 5,
+            }}
+          />
+        )}
       </GoogleMap>
 
       {/* Status bar */}
