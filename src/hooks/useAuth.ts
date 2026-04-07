@@ -37,12 +37,12 @@ export function useAuth() {
 
   useEffect(() => {
     // 1. Restore session from storage first
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    Promise.resolve(supabase.auth.getSession()).then(({ data: { session } }) => {
       if (session?.user) {
         loadProfile(session.user.id, login);
       }
       setLoading(false);
-    }).then(undefined, () => {
+    }).catch(() => {
       setLoading(false);
     });
 
