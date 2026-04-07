@@ -70,9 +70,7 @@ export interface Emergency {
   eta: number;
 }
 
-export const INITIAL_EMERGENCIES: Emergency[] = [
-  { id: 101, userName: "Demo Patient", location: "Mumbai-Pune Expressway, NH-48, Khopoli Exit", status: "assigned", ambulanceId: 2, severity: "critical", time: "4 min ago", lat: 18.6012, lng: 73.7634, distance: "1.8", eta: 4 },
-];
+export const INITIAL_EMERGENCIES: Emergency[] = [];
 
 export function haversine(a: [number, number], b: [number, number]): number {
   const R = 6371, d2r = Math.PI / 180;

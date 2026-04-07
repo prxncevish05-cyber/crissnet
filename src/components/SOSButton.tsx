@@ -1,10 +1,11 @@
 import { useState, useRef } from "react";
 import { useAppStore } from "@/stores/appStore";
 import { useToastNotify } from "@/hooks/useToastNotify";
+import { supabase } from "@/integrations/supabase/client";
 
 const SOSButton = () => {
   const notify = useToastNotify();
-  const { sosState, setSosState, fireSOS, user, myEmergency } = useAppStore();
+  const { sosState, setSosState, fireSOS, user, myEmergency, userLocation } = useAppStore();
   const [holdPct, setHoldPct] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -30,18 +31,68 @@ const SOSButton = () => {
     setHoldPct(0);
   };
 
-  const doFire = () => {
+  const doFire = async () => {
     setSosState("loading");
-    notify("📍 Locating you on NH-48…", "GPS capture in progress", "info");
-    setTimeout(() => {
-      const emg = fireSOS(user?.name || "User");
-      if (!emg) {
-        notify("No ambulance available", "Please call 112 directly", "err");
+    notify("📍 Locating you…", "GPS capture in progress", "info");
+
+    setTimeout(async () => {
+      try {
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        if (!authUser) {
+          notify("Not authenticated", "Please log in again", "err");
+          setSosState("idle");
+          setHoldPct(0);
+          return;
+        }
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("name, phone")
+          .eq("user_id", authUser.id)
+          .maybeSingle();
+
+        const lat = userLocation?.[0] || 0;
+        const lng = userLocation?.[1] || 0;
+
+        // Insert SOS request into database — ambulance will get real-time notification
+        const { data: inserted, error } = await supabase
+          .from("ambulance_history")
+          .insert({
+            patient_user_id: authUser.id,
+            patient_name: profile?.name || user?.name || "Unknown",
+            patient_phone: profile?.phone || user?.phone || "",
+            location: `GPS: ${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E`,
+            latitude: lat,
+            longitude: lng,
+            severity: "critical",
+            status: "pending",
+          })
+          .select()
+          .single();
+
+        if (error) {
+          console.error("SOS insert error:", error);
+          notify("SOS Failed", "Could not send request. Try again.", "err");
+          setSosState("idle");
+          setHoldPct(0);
+          return;
+        }
+
+        // Update local state
+        const emg = fireSOS(user?.name || "User");
+        if (emg && inserted) {
+          // Store the DB record ID in local emergency
+          emg.id = inserted.id as any;
+        }
+
+        setSosState("activated");
+        notify("🚨 SOS Sent!", "Emergency request sent to nearby ambulances", "ok");
+      } catch (err) {
+        console.error("SOS error:", err);
+        notify("Error", "Something went wrong", "err");
         setSosState("idle");
         setHoldPct(0);
-        return;
       }
-      notify("🚑 Ambulance Dispatched!", `${emg.ambulanceName} · ${emg.distance} km · ETA ${emg.eta} min`, "ok");
     }, 2200);
   };
 
@@ -96,7 +147,7 @@ const SOSButton = () => {
         </button>
       </div>
       <div className="text-center text-sm text-muted-foreground mt-2 px-7 leading-relaxed">
-        Emergency services will be notified<br />of your exact GPS location on NH-48
+        Emergency services will be notified<br />of your exact GPS location
       </div>
     </div>
   );
