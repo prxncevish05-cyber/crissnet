@@ -27,6 +27,7 @@ export type Database = {
           longitude: number | null
           patient_name: string
           patient_phone: string | null
+          patient_user_id: string | null
           resolved_at: string | null
           severity: string
           status: string
@@ -43,6 +44,7 @@ export type Database = {
           longitude?: number | null
           patient_name: string
           patient_phone?: string | null
+          patient_user_id?: string | null
           resolved_at?: string | null
           severity?: string
           status?: string
@@ -59,6 +61,7 @@ export type Database = {
           longitude?: number | null
           patient_name?: string
           patient_phone?: string | null
+          patient_user_id?: string | null
           resolved_at?: string | null
           severity?: string
           status?: string
