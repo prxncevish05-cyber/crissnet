@@ -4,11 +4,13 @@ import { useAppStore } from "@/stores/appStore";
 import type { UserRole } from "@/lib/constants";
 
 function loadProfile(userId: string, login: (u: any) => void) {
-  supabase
-    .from("profiles")
-    .select("*")
-    .eq("user_id", userId)
-    .maybeSingle()
+  Promise.resolve(
+    supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle()
+  )
     .then(({ data: profile }) => {
       if (profile) {
         const av = profile.name
@@ -36,17 +38,17 @@ export function useAuth() {
   const user = useAppStore((s) => s.user);
 
   useEffect(() => {
-    // 1. Restore session from storage first
-    Promise.resolve(supabase.auth.getSession()).then(({ data: { session } }) => {
-      if (session?.user) {
-        loadProfile(session.user.id, login);
-      }
-      setLoading(false);
-    }).catch(() => {
-      setLoading(false);
-    });
+    Promise.resolve(supabase.auth.getSession())
+      .then(({ data: { session } }) => {
+        if (session?.user) {
+          loadProfile(session.user.id, login);
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
 
-    // 2. Listen for future auth changes (no await inside!)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (session?.user) {
@@ -57,7 +59,6 @@ export function useAuth() {
       }
     );
 
-    // 3. Safety timeout — never stay loading forever
     const timeout = setTimeout(() => setLoading(false), 5000);
 
     return () => {
