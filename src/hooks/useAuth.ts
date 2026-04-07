@@ -42,7 +42,7 @@ export function useAuth() {
         loadProfile(session.user.id, login);
       }
       setLoading(false);
-    }).catch(() => {
+    }).then(undefined, () => {
       setLoading(false);
     });
 
