@@ -3,6 +3,34 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAppStore } from "@/stores/appStore";
 import type { UserRole } from "@/lib/constants";
 
+function loadProfile(userId: string, login: (u: any) => void) {
+  Promise.resolve(
+    supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle()
+  )
+    .then(({ data: profile }) => {
+      if (profile) {
+        const av = profile.name
+          .split(" ")
+          .filter(Boolean)
+          .map((w: string) => w[0])
+          .join("")
+          .toUpperCase()
+          .slice(0, 2) || "??";
+        login({
+          role: profile.role as UserRole,
+          name: profile.name,
+          phone: profile.phone,
+          avatar: av,
+        });
+      }
+    })
+    .catch((err) => console.error("Profile fetch error:", err));
+}
+
 export function useAuth() {
   const [loading, setLoading] = useState(true);
   const login = useAppStore((s) => s.login);
@@ -10,66 +38,33 @@ export function useAuth() {
   const user = useAppStore((s) => s.user);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+    Promise.resolve(supabase.auth.getSession())
+      .then(({ data: { session } }) => {
         if (session?.user) {
-          // Fetch profile
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("user_id", session.user.id)
-            .maybeSingle();
+          loadProfile(session.user.id, login);
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
 
-          if (profile) {
-            const av = profile.name
-              .split(" ")
-              .filter(Boolean)
-              .map((w: string) => w[0])
-              .join("")
-              .toUpperCase()
-              .slice(0, 2) || "??";
-            login({
-              role: profile.role as UserRole,
-              name: profile.name,
-              phone: profile.phone,
-              avatar: av,
-            });
-          }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (session?.user) {
+          loadProfile(session.user.id, login);
         } else if (event === "SIGNED_OUT") {
           logout();
         }
-        setLoading(false);
       }
     );
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("user_id", session.user.id)
-          .maybeSingle();
+    const timeout = setTimeout(() => setLoading(false), 5000);
 
-        if (profile) {
-          const av = profile.name
-            .split(" ")
-            .filter(Boolean)
-            .map((w: string) => w[0])
-            .join("")
-            .toUpperCase()
-            .slice(0, 2) || "??";
-          login({
-            role: profile.role as UserRole,
-            name: profile.name,
-            phone: profile.phone,
-            avatar: av,
-          });
-        }
-      }
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, [login, logout]);
 
   const signOut = async () => {
