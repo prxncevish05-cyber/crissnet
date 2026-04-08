@@ -45,17 +45,27 @@ export function useAuth() {
         }
         setLoading(false);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.warn("Session recovery failed, clearing stale session:", err);
+        supabase.auth.signOut().catch(() => {});
         setLoading(false);
       });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        if (event === "TOKEN_REFRESHED" && !session) {
+          // Token refresh failed — clear stale state
+          supabase.auth.signOut().catch(() => {});
+          logout();
+          setLoading(false);
+          return;
+        }
         if (session?.user) {
           loadProfile(session.user.id, login);
         } else if (event === "SIGNED_OUT") {
           logout();
         }
+        setLoading(false);
       }
     );
 
